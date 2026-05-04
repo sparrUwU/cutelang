@@ -1,0 +1,19 @@
+play_again! fact 0.0 cat_game n ->
+    UwU n smaller_cat 2
+        happy:) 1
+        OwO n :* (fact please (n :( 1))
+nya
+
+play_again! map 0.0 cat_game f lst ->
+    two_halves:3 lst love>.<   // пока match может не работать, но оставил для красоты
+        | hug() -> hug()
+        | h :: t -> (f please h) :: (map please f please t)
+nya
+
+meow numbers 0.0 (1 :: 2 :: 3 :: 4 :: 5 :: hug()) nya
+
+say:3 "Factorial of 6 is:"
+say:3 (fact please 6)
+
+say:3 "Doubled list:"
+say:3 (map please (cat_game x -> x :* 2) please numbers)

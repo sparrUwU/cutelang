@@ -1,122 +1,64 @@
-namespace CuteLang
-
+namespace CatLang
 open FParsec
 
+#nowarn "40"
+
+type Parser<'t> = Parser<'t, unit>
+
 module Parser =
-    open Ast
 
-    let tokens: Token list ref = ref []
-    let mutable pos = 0
+    let ws = spaces
+    let str s = pstring s .>> ws
 
-    let peek () =
-        if pos < (!tokens).Length then Some (!tokens).[pos]
-        else None
+    let pInt = pint32 .>> ws |>> Int
+    let pTrue = str "yesss;3" >>% Bool true
+    let pFalse = str "nooo:(" >>% Bool false
+    let pUnit = str "hug()" >>% EmptyList
 
-    let consume () =
-        let t = peek ()
-        pos <- pos + 1
-        t
+    let pVar = identifier (IdentifierOptions()) .>> ws |>> Var
 
-    let expect (expected: Token) =
-        match consume () with
-        | Some t when t = expected -> ()
-        | Some t -> failwithf "Expected %A, got %A" expected t
-        | None -> failwith "Unexpected EOF"
+    let rec term = 
+        choice [
+            pLambda
+            pLet
+            pLetRec
+            pIf
+            pApp
+            pCons
+            pAtom
+            between (str "(") (str ")") term
+        ] .>> ws
 
-    let parseProgram () =
-        let rec parseDefinitions () =
-            match peek () with
-            | Some DEFINE ->
-                expect DEFINE
-                match consume () with
-                | Some (ID name) ->
-                    expect ARROW
-                    let rec parseParams () =
-                        match peek () with
-                        | Some PARAM ->
-                            expect PARAM
-                            match consume () with
-                            | Some (ID param) ->
-                                expect CUTE_O
-                                param :: parseParams ()
-                            | _ -> failwith "Expected parameter name"
-                        | _ -> []
-                    let parameters = parseParams ()
-                    let body = parseExpression ()
-                    let def = { Name = name; Parameters = parameters; Body = body }
-                    def :: parseDefinitions ()
-                | _ -> failwith "Expected function name"
-            | Some EOF -> []
-            | Some _ ->
-                let expr = parseExpression ()
-                let def = { Name = "main"; Parameters = []; Body = expr }
-                [def]
-            | None -> []
+    and pAtom = 
+        choice [pInt; pTrue; pFalse; pUnit; pVar]
 
-        and parseExpression () =
-            match peek () with
-            | Some (INT n) ->
-                expect (INT n)
-                Integer n
-            | Some (STR s) ->
-                expect (STR s)
-                String s
-            | Some NIL ->
-                expect NIL
-                EmptyList
-            | Some (ID name) ->
-                expect (ID name)
-                Symbol name
-            | Some COND_IF ->
-                expect COND_IF
-                let cond = parseExpression ()
-                expect COND_THEN
-                let trueBr = parseExpression ()
-                expect COND_ELSE
-                let falseBr = parseExpression ()
-                Conditional (cond, trueBr, falseBr)
-            | Some LET ->
-                expect LET
-                match consume () with
-                | Some (ID name) ->
-                    let value = parseExpression ()
-                    let body = parseExpression ()
-                    LetBinding (name, value, body)
-                | _ -> failwith "Expected variable name"
-            | Some CONS ->
-                expect CONS
-                let head = parseExpression ()
-                let tail = parseExpression ()
-                Cons (head, tail)
-            | Some HEAD ->
-                expect HEAD
-                Head (parseExpression ())
-            | Some TAIL ->
-                expect TAIL
-                Tail (parseExpression ())
-            | Some LAZY ->
-                expect LAZY
-                Lazy (parseExpression ())
-            | Some FORCE ->
-                expect FORCE
-                Force (parseExpression ())
-            | Some PRINT ->
-                expect PRINT
-                Print (parseExpression ())
-            | Some READ ->
-                expect READ
-                Read
-            | Some UNDERSCORE ->
-                expect UNDERSCORE
-                let func = parseExpression ()
-                let arg = parseExpression ()
-                Application (func, arg)
-            | _ ->
-                failwithf "Unexpected token in expression: %A" (peek ())
+    and pApp = 
+        pAtom .>> str "please" .>>. term |>> App
 
-        let defs = parseDefinitions ()
-        { Definitions = defs |> List.filter (fun d -> d.Name <> "main") 
-          MainExpression = 
-            defs 
-            |> List.tryFind (fun d -> d.Name = "main") 
-            |> Option.map (fun d -> d.Body) }
+    and pCons = 
+        pAtom .>> str "::" .>>. term |>> Cons
+
+    and pLambda =
+        str "cat_game" >>. many1 (identifier(IdentifierOptions()) .>> ws) .>> str "->" .>>. term
+        |>> fun (args, body) -> List.foldBack (fun x e -> Lambda(x, e)) args body
+
+    and pLet =
+        str "meow" >>. pVar .>> str "0.0" .>>. term .>> str "nya" .>>. term
+        |>> fun ((Var name, e1), e2) -> Let(name, e1, e2)
+
+    and pLetRec =
+        str "play_again!" >>. pVar .>> str "0.0" .>>. term .>> str "nya" .>>. term
+        |>> fun ((Var name, e1), e2) -> LetRec(name, e1, e2)
+
+    and pIf =
+        str "UwU" >>. term .>> str "happy:)" .>>. term .>> str "OwO" .>>. term
+        |>> fun ((cond, thenExpr), elseExpr) -> If(cond, thenExpr, elseExpr)
+
+    // IO
+    let pPrint = str "say:3" >>. term |>> Print
+    let pRead : Parser<Expr> = str "listen:3" >>% Read
+
+    let parse (input: string) =
+        match run (term .>> eof) input with
+        | Success (result, _, _) -> Result.Ok result
+        | Failure (msg, _, _) -> Result.Error msg

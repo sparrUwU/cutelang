@@ -1,0 +1,10 @@
+meow lst 0.0 (1 :: 2 :: 3 :: hug()) nya
+
+two_halves:3 lst love>.<
+    | hug() -> say:3 "Empty list"
+    | h :: t -> 
+        say:3 "Head is:"
+        say:3 h
+        say:3 "Tail is:"
+        say:3 t
+nya

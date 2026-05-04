@@ -1,0 +1,10 @@
+play_again! map 0.0 cat_game f lst ->
+    two_halves:3 lst love>.<
+        | hug() -> hug()
+        | h :: t -> (f please h) :: (map please f please t)
+nya
+
+play_again! double 0.0 cat_game x -> x :* 2 nya
+
+meow numbers 0.0 (1 :: 2 :: 3 :: 4 :: hug()) nya
+say:3 (map please double please numbers)

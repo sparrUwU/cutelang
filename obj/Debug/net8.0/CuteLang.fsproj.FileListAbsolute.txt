@@ -1,0 +1,5 @@
+/mnt/c/Users/sparrowo/Documents/GitHub/cutelang/obj/Debug/net8.0/CuteLang.fsproj.AssemblyReference.cache
+/mnt/c/Users/sparrowo/Documents/GitHub/cutelang/obj/Debug/net8.0/CuteLang.AssemblyInfoInputs.cache
+/mnt/c/Users/sparrowo/Documents/GitHub/cutelang/obj/Debug/net8.0/CuteLang.AssemblyInfo.fs
+/mnt/c/Users/sparrowo/Documents/GitHub/cutelang/obj/Debug/net8.0/CuteLang.fsproj.CoreCompileInputs.cache
+/mnt/c/Users/sparrowo/Documents/GitHub/cutelang/obj/Debug/net8.0/CuteLang.sourcelink.json

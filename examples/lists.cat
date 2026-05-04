@@ -1,0 +1,7 @@
+meow mylist 0.0 (10 :: 20 :: 30 :: 40 :: hug()) nya
+
+say:3 (first_cat please mylist)
+say:3 (last_cat please mylist)
+
+meow tailList 0.0 (20 :: 30 :: 40 :: hug()) nya
+say:3 (first_cat please tailList)
